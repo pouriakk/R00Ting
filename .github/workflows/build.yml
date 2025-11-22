@@ -1,0 +1,23 @@
+name: Build APK
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Android SDK
+      run: |
+        mkdir -p android-sdk
+        cd android-sdk
+        wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip
+        unzip commandlinetools-linux-8512546_latest.zip
+        yes | ./cmdline-tools/bin/sdkmanager --sdk_root=. "platforms;android-33" "build-tools;33.0.1"
+    - name: Build APK
+      run: |
+        cd android-sdk
+        ./build-tools/33.0.1/aapt package -f -M ../AndroidManifest.xml -S ../res -I ./platforms/android-33/android.jar -F ../root.apk
+    - name: Upload APK
+      uses: actions/upload-artifact@v2
+      with:
+        name: Root-App
+        path: root.apk
